@@ -12,8 +12,8 @@ public class CentralServer {
 			// Listen for a TCP connection request.
 			Socket clientSocket = serverListenSocket.accept();
 
-			BufferedReader in = 
-					new BufferedReader(new InputStreamReader (clientSocket.getInputStream()));
+			//BufferedReader in = 
+			//		new BufferedReader(new InputStreamReader (clientSocket.getInputStream()));
 			// DataOutputStream out = 
 			// 		new DataOutputStream(clientSocket.getOutputStream());
 

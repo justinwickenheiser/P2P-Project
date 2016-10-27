@@ -5,47 +5,51 @@ import java.util.*;
 public class Handler extends Thread {
 
 	Socket clientSocket;
-	BufferedReader in;
+	DataInputStream in;
 	DataOutputStream out;
 	ServerSocket dataSocket;
-
+	protected static Vector handlers = new Vector();
 
 	// Constructor
 	public Handler(Socket socket) throws IOException {
 		this.clientSocket = socket;
-		in = new BufferedReader(new InputStreamReader (clientSocket.getInputStream()));
+		in = new DataInputStream (clientSocket.getInputStream());
 		out = new DataOutputStream(clientSocket.getOutputStream());
-		// Set up data socket to receive file descriptions
-		dataSocket = new ServerSocket(4097);
-			
 	}
 
 	public void run() {
 		try {
+			// Add this thread to the vector of threads
+			handlers.addElement(this);
+
 			System.out.println("Handling Request...\n" + 
 					"Host: " + clientSocket.getInetAddress().getHostAddress() + 
 					"\nPort: " + clientSocket.getPort());
 
 			// Get Username, Hostname, and Connection Speed from the client
+			String cmd = in.readUTF();
+			String[] clientArgs = cmd.split(" ");
 
 			// Store that info into "Users" table
+			String clientUsername = clientArgs[0];
+			String clientHostname = clientArgs[1];
+			String clientSpeed = clientArgs[2];
+
+			System.out.println("Added User to 'Users' Table...\n" + 
+					"Username: " + clientUsername + 
+					"\nHosename: " + clientHostname +
+					"\nSpeed: " + clientSpeed + "\n");
 
 
-			Socket data = dataSocket.accept();
+			// Receive the filelist.xml file and add it to the "files" table
+			
 
-			BufferedReader dataIn = 
-					new BufferedReader(new InputStreamReader (data.getInputStream()));
-			InputStream dataIS = data.getInputStream();
-			OutputStream dataOut = data.getOutputStream();
-
-			String requestLine = dataIn.readLine();
 
 		
 			System.out.println("Session Ended.");
 			out.close();
 			in.close();
 			clientSocket.close();
-			data.close();
 		} catch (IOException ex) {
 			System.out.println("-- Connection to user lost.");
 		} finally {
