@@ -39,7 +39,7 @@ public class Handler extends Thread {
 			// Add this thread to the vector of threads
 			handlers.addElement(this);
 
-			System.out.println("Handling Request...\n" + 
+			System.out.println("\nHandling Request...\n" + 
 					"Host: " + clientSocket.getInetAddress().getHostAddress() + 
 					"\nPort: " + clientSocket.getPort());
 
@@ -93,10 +93,8 @@ public class Handler extends Thread {
 		}
 	}
 
-	private void recvFile(InputStream is) throws Exception {
+	private void recvFile(DataInputStream is) throws Exception {
 		System.out.println("Receiving File...");
-		byte[] b = new byte [1024];
-		int amount_read;
 	
 		DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
 		DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
@@ -128,12 +126,14 @@ public class Handler extends Thread {
 						System.out.println("\nSpeed: " + handler.clientSpeed);
 						System.out.println("Hostname: " + handler.clientUsername + "/" + handler.clientHostname);
 						System.out.println("File: " + nameField);
-						/*
+
+						String result = new String(handler.clientSpeed + " " + handler.clientUsername + "/" + handler.clientHostname + " " + nameField);
+						
 						try {
-							handler.out.writeUTF(nameField);
+							handler.out.writeUTF(result);
 						} catch (IOException ex) { 
 							handler.stop (); 
-						}*/
+						}
 					}
 				}	
 			}

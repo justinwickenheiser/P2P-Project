@@ -54,22 +54,29 @@ public class Host {
 			}
 		}
 
+		// close dataSocket
+		dataSocket.close();
+
 		// Do a keyword search
 		System.out.println("\nKeyword Search: ");
 		String keyword = input.nextLine();
 		out.writeUTF(keyword);
 
 		// read responses from keyword search from central server
-/*
-		while (!dataSocket.isClosed()) {
-			System.out.println(dataIn.readUTF());
+		try {
+			System.out.println("\n-- Results --");
+			while (!socket.isClosed()) {
+				System.out.println(in.readUTF());
+			}
+		} catch (EOFException e) {
+			System.out.println("\n-- End of Results --");
 		}
-*/
+
 		
 
 	}
 	
-	private static void sendFile(FileInputStream fis, OutputStream os) throws Exception {
+	private static void sendFile(FileInputStream fis, DataOutputStream os) throws Exception {
 		System.out.println("Sending filelist.xml");
 		byte[] buffer = new byte[1024];
 		int bytes = 0;
