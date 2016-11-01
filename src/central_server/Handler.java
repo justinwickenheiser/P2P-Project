@@ -11,16 +11,24 @@ import org.w3c.dom.*;
 public class Handler extends Thread {
 
 	Socket clientSocket;
+	ServerSocket dataSocket;
 	DataInputStream in;
 	DataOutputStream out;
-	ServerSocket dataSocket;
-	NodeList nameArray;
-	NodeList descArray;
+	DataInputStream dataIn;
+	DataOutputStream dataOut;
+
+	String clientUsername;
+	String clientHostname;
+	String clientSpeed;
+
+	public NodeList nameArray;
+	public NodeList descArray;
 	protected static Vector handlers = new Vector();
 
 	// Constructor
-	public Handler(Socket socket) throws IOException {
+	public Handler(Socket socket, ServerSocket datalistener) throws IOException {
 		this.clientSocket = socket;
+		this.dataSocket = datalistener;
 		this.in = new DataInputStream (clientSocket.getInputStream());
 		this.out = new DataOutputStream(clientSocket.getOutputStream());
 	}
@@ -40,27 +48,24 @@ public class Handler extends Thread {
 			String[] clientArgs = cmd.split(" ");
 
 			// Store that info into "Users" table
-			String clientUsername = clientArgs[0];
-			String clientHostname = clientArgs[1];
-			String clientSpeed = clientArgs[2];
+			clientUsername = clientArgs[0];
+			clientHostname = clientArgs[1];
+			clientSpeed = clientArgs[2];
 
-			System.out.println("Added User to 'Users' Table...\n" + 
+			System.out.println("\nAdded User to 'Users' Table...\n" + 
 					"Username: " + clientUsername + 
 					"\nHostname: " + clientHostname +
 					"\nSpeed: " + clientSpeed + "\n");
 
-			/*
-			 * We are grabbing the user's keyword search now and writing it to the server now
-			 * in order to prevent weird issues with the xml parser on the server side. We will
-			 * not run the search until after handling the file upload from the client
-			 */
-			String keyword = in.readUTF();
+			// accept the connection of data socket
+			Socket clientDataSocket = dataSocket.accept();
+			dataIn = new DataInputStream (clientDataSocket.getInputStream());
+			dataOut = new DataOutputStream(clientDataSocket.getOutputStream());
 			
-			// Hand file upload
+			// Handle file upload
 			try {
 				// Receive the filelist.xml file and add it to the "files" table
-				// Parse the filelist.xml file
-				recvFile(in, nameArray, descArray);
+				recvFile(dataIn);
 				System.out.println("filelist.xml retrieved.");
 			} catch (Exception e) {
 				System.out.println("Error reading the filelist.");
@@ -69,9 +74,8 @@ public class Handler extends Thread {
 
 			// Handle search
 			try {
-				//searchFile(keyword, nameArray, descArray);
-				System.out.println("nameArray[0]: " +  nameArray.item(0).getTextContent());
-
+				String keyword = in.readUTF();
+				searchFile(keyword);
 			} catch (Exception e) {
 				System.out.println("Error searching files");
 				System.out.println(e);
@@ -80,13 +84,16 @@ public class Handler extends Thread {
 			System.out.println("Session Ended.");
 			out.close();
 			in.close();
+			dataIn.close();
+			dataOut.close();
 			clientSocket.close();
+			clientDataSocket.close();
 		} catch (IOException ex) {
 			System.out.println("-- Connection to user lost.");
 		}
 	}
 
-	private static void recvFile(InputStream is, NodeList nameFieldArray, NodeList descFieldArray) throws Exception {
+	private void recvFile(InputStream is) throws Exception {
 		System.out.println("Receiving File...");
 		byte[] b = new byte [1024];
 		int amount_read;
@@ -94,43 +101,41 @@ public class Handler extends Thread {
 		DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
 		DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
 		Document document = documentBuilder.parse(is);
-		nameFieldArray = document.getElementsByTagName("name");
-		descFieldArray = document.getElementsByTagName("description");
-		
-		is.close();
-		/*
-		 * USAGE:
-		 * String nameField = document.getElementsByTagName("name").item(0).getTextContent();
-		 * String descField = document.getElementsByTagName("description").item(0).getTextContent();
-		 */
+		nameArray = document.getElementsByTagName("name");
+		descArray = document.getElementsByTagName("description");
 	}
 
-	private static void searchFile(String kw, NodeList nameFieldArray, NodeList descFieldArray) throws Exception {
+	private void searchFile(String kw) throws Exception {
 		synchronized (handlers) {
 			Enumeration e = handlers.elements ();
 			while (e.hasMoreElements()) {
 				Handler handler = (Handler) e.nextElement();
-				//try {
-					int numOfNames = nameFieldArray.getLength();
-					int numOfDescs = descFieldArray.getLength();
+				
+				int numOfDescs = descArray.getLength();
 
-					String nameField = new String("");
-					String descField = new String("");
+				String nameField = new String("");
+				String descField = new String("");
 
-					// loop through the names
-					for (int i = 0; i < numOfNames; i++) {
-						nameField = nameFieldArray.item(i).getTextContent();
-						if (nameField.toLowerCase().contains(kw.toLowerCase())) {
-							// name contains keyword
-							System.out.println(nameField);
-						}
+				// loop through the descriptions
+				for (int i = 0; i < numOfDescs; i++) {
+					descField = descArray.item(i).getTextContent();
+					if (descField.toLowerCase().contains(kw.toLowerCase())) {
+						// description contains keyword
+						// get the name of the file with that description
+						nameField = nameArray.item(i).getTextContent();
+						
+						// output the speed, hostname, and filename
+						System.out.println("\nSpeed: " + handler.clientSpeed);
+						System.out.println("Hostname: " + handler.clientUsername + "/" + handler.clientHostname);
+						System.out.println("File: " + nameField);
+						/*
+						try {
+							handler.out.writeUTF(nameField);
+						} catch (IOException ex) { 
+							handler.stop (); 
+						}*/
 					}
-
-					//handler.out.writeUTF(message);
-
-				//} catch (IOException ex) { 
-				//	handler.stop (); 
-				//} 
+				}	
 			}
 		}
 	}

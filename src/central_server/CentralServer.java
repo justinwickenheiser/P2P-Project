@@ -7,17 +7,12 @@ public class CentralServer {
 	public CentralServer(int listenPort) throws IOException {
 		// Establish the listen socket.
 		ServerSocket serverListenSocket = new ServerSocket(listenPort);
-		
+		ServerSocket dataListenSocket = new ServerSocket(4097);
 		while (true) {
 			// Listen for a TCP connection request.
 			Socket clientSocket = serverListenSocket.accept();
 
-			//BufferedReader in = 
-			//		new BufferedReader(new InputStreamReader (clientSocket.getInputStream()));
-			// DataOutputStream out = 
-			// 		new DataOutputStream(clientSocket.getOutputStream());
-
-			Handler handlerForClient = new Handler(clientSocket);
+			Handler handlerForClient = new Handler(clientSocket, dataListenSocket);
 			handlerForClient.start();
 		}
 	}

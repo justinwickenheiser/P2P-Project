@@ -19,6 +19,10 @@ public class Host {
 		Socket socket = new Socket(server, serverPort);
 		DataInputStream in  = new DataInputStream(socket.getInputStream());
 		DataOutputStream out = new DataOutputStream(socket.getOutputStream());
+		// Create data socket that is connected to server on port 4097
+		Socket dataSocket = new Socket(server, 4097);
+		DataInputStream dataIn  = new DataInputStream(dataSocket.getInputStream());
+		DataOutputStream dataOut = new DataOutputStream(dataSocket.getOutputStream());
 
 		System.out.println("Connecting..." + "\nServer: " + server + "\nPort: " + serverPort);
 
@@ -28,23 +32,13 @@ public class Host {
 		String cmd = input.nextLine();
 		out.writeUTF(cmd);
 
-		/*
-		 * We are grabbing the user's keyword search now and writing it to the server now
-		 * in order to prevent weird issues with the xml parser on the server side.
-		 */
-
-		// Do a keyword search
-		System.out.println("\nKeyword Search: ");
-		String keyword = input.nextLine();
-		out.writeUTF(keyword);
-
 		// Send filelist.xml file
 		String fileName = new String("fileList.xml");
 		FileInputStream fis = null;
 		boolean fileExists = true ;
 		try {
 			fis = new FileInputStream(fileName);
-			System.out.println("The filelist.xml was found.");
+			System.out.println("\nThe filelist.xml was found.");
 
 		} catch (FileNotFoundException e) {
 			fileExists = false ;
@@ -52,14 +46,25 @@ public class Host {
 
 		if (fileExists) {
 			try {
-				sendFile(fis, out);
+				sendFile(fis, dataOut);
 				fis.close();
-				System.out.println("\nSent File: " + fileName);	
+				System.out.println("Sent File: " + fileName);
 			} catch (Exception e) {
 				System.out.println("ERROR in FILE TRANSFER.");
 			}
 		}
 
+		// Do a keyword search
+		System.out.println("\nKeyword Search: ");
+		String keyword = input.nextLine();
+		out.writeUTF(keyword);
+
+		// read responses from keyword search from central server
+/*
+		while (!dataSocket.isClosed()) {
+			System.out.println(dataIn.readUTF());
+		}
+*/
 		
 
 	}
