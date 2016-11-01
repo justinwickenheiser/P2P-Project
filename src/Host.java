@@ -1,6 +1,7 @@
 import java.io.*;
 import java.net.*;
 import java.util.*;
+import java.lang.*;
 
 public class Host {
 
@@ -27,6 +28,16 @@ public class Host {
 		String cmd = input.nextLine();
 		out.writeUTF(cmd);
 
+		/*
+		 * We are grabbing the user's keyword search now and writing it to the server now
+		 * in order to prevent weird issues with the xml parser on the server side.
+		 */
+
+		// Do a keyword search
+		System.out.println("\nKeyword Search: ");
+		String keyword = input.nextLine();
+		out.writeUTF(keyword);
+
 		// Send filelist.xml file
 		String fileName = new String("fileList.xml");
 		FileInputStream fis = null;
@@ -43,13 +54,13 @@ public class Host {
 			try {
 				sendFile(fis, out);
 				fis.close();
-				System.out.println("\nSent File: " + fileName);
-				
+				System.out.println("\nSent File: " + fileName);	
 			} catch (Exception e) {
 				System.out.println("ERROR in FILE TRANSFER.");
 			}
 		}
 
+		
 
 	}
 	
