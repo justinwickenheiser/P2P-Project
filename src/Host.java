@@ -55,6 +55,8 @@ public class Host {
 		}
 
 		// close dataSocket
+		dataIn.close();
+		dataOut.close();
 		dataSocket.close();
 
 		// Do a keyword search
