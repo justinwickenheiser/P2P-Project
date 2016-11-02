@@ -21,8 +21,8 @@ public class Handler extends Thread {
 	String clientHostname;
 	String clientSpeed;
 
-	public NodeList nameArray;
-	public NodeList descArray;
+	NodeList nameArray;
+	NodeList descArray;
 	protected static Vector handlers = new Vector();
 
 	// Constructor
@@ -56,6 +56,11 @@ public class Handler extends Thread {
 					"Username: " + clientUsername + 
 					"\nHostname: " + clientHostname +
 					"\nSpeed: " + clientSpeed + "\n");
+
+			// print who is all here
+			System.out.println("\n---- Users ----");
+			printHandlers();
+			System.out.println("---------------");
 
 			// accept the connection of data socket
 			Socket clientDataSocket = dataSocket.accept();
@@ -109,18 +114,18 @@ public class Handler extends Thread {
 			while (e.hasMoreElements()) {
 				Handler handler = (Handler) e.nextElement();
 				
-				int numOfDescs = descArray.getLength();
+				int numOfDescs = handler.descArray.getLength();
 
 				String nameField = new String("");
 				String descField = new String("");
 
 				// loop through the descriptions
 				for (int i = 0; i < numOfDescs; i++) {
-					descField = descArray.item(i).getTextContent();
+					descField = handler.descArray.item(i).getTextContent();
 					if (descField.toLowerCase().contains(kw.toLowerCase())) {
 						// description contains keyword
 						// get the name of the file with that description
-						nameField = nameArray.item(i).getTextContent();
+						nameField = handler.nameArray.item(i).getTextContent();
 						
 						// output the speed, hostname, and filename
 						System.out.println("\nSpeed: " + handler.clientSpeed);
@@ -136,6 +141,18 @@ public class Handler extends Thread {
 						}
 					}
 				}	
+			}
+		}
+	}
+
+	private void printHandlers() {
+		synchronized (handlers) {
+			Enumeration e = handlers.elements ();
+			while (e.hasMoreElements()) {
+				Handler handler = (Handler) e.nextElement();
+				
+				// output the speed, hostname, and filename
+				System.out.println("User: " + handler.clientUsername + "/" + handler.clientHostname + "\t" + handler.clientSpeed);
 			}
 		}
 	}
