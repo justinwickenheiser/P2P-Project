@@ -1,89 +1,90 @@
 import java.io.*;
 import java.net.*;
 import java.util.*;
+import java.lang.*;
 
 public class FTPClient {
 
-	public static void main (String argv[]) throws IOException {
-		Scanner input = new Scanner(System.in);
-
-		//CONNECT with Server
-		System.out.println("Connect to Server: CONNECT <server> <port>");
-
-		String cmd = input.nextLine();
-		String[] args = cmd.split(" ");
-
-		if (args.length != 3) {
-			input.close();
-			throw new IllegalArgumentException("Syntax Error: CONNECT <server> <port>");
+	public static void main (String[] args) throws IOException {
+		if (args.length != 2) { // Test for correct # of args
+			throw new IllegalArgumentException("Parameter(s): <Server> <port_to_connect_to>\nSuggested port: 2264");
 		}
+
+		Scanner input = new Scanner(System.in);
+		String cmd = new String("");
+		String[] arguments;
+		int recvMsgSize;	// Size of received message
+		byte[] byteBuffer;
+
+		String server = args[0];
+		int serverPort = new Integer(args[1]).intValue();
+
+		// Create socket that is connected to server on specified port
+		Socket socket = new Socket(server, serverPort);
+		DataInputStream in  = new DataInputStream(socket.getInputStream());
+		DataOutputStream out = new DataOutputStream(socket.getOutputStream());
+
+		// predefine these variables
+		Socket dataSocket;
+		DataInputStream dataIn;
+		DataOutputStream dataOut;
+
+		System.out.println("Connecting..." + "\nServer: " + server + "\nPort: " + serverPort);
 		
-		String server = args[1];
-		int port = new Integer(args[2]).intValue();
-		byte[] buffer;
-
-		//Create socket and Input / Output Stream
-		//TODO: create as Buffer Readers
-		Socket socket = new Socket(server, port);
-		BufferedReader in  = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-		OutputStream out = socket.getOutputStream();
-
-		System.out.println("Connecting..." 
-				+ "\nServer: " + server + "\nPort: " + port);
-
-		while (true) {
-			System.out.println("\nEnter Command:");
+		// while there is still a control connection
+		while (!socket.isClosed()) {
+			System.out.print("cmd: ");
 			cmd = input.nextLine();
-			args = cmd.split(" ");
-			buffer = cmd.getBytes();
+			arguments = cmd.split(" ");
+			byteBuffer = cmd.getBytes();
 			
+			// send cmd
+			out.writeUTF(cmd);
 
-			switch (args[0]) {
-			case "LIST" :
+			switch (arguments[0].toLowerCase()) {
+			case "list" :
 				
-				//EST Data Communication Socket
-				Socket data = new Socket(server, 4097);
-				BufferedReader dataIn  = 
-						new BufferedReader(new InputStreamReader(data.getInputStream()));
-				PrintStream dataOut = new PrintStream(data.getOutputStream());
-				
-				dataOut.println(cmd);
-				String response = dataIn.readLine();
-				
-				while (response.length() != 0) {
-					System.out.println(response);
-					response = dataIn.readLine();	
+				// Create data socket that is connected to server on port 2265
+				dataSocket = new Socket(server, 2265);
+				dataIn  = new DataInputStream(dataSocket.getInputStream());
+				dataOut = new DataOutputStream(dataSocket.getOutputStream());
+
+				// number of files
+				int numOfFiles = Integer.parseInt(dataIn.readUTF());
+				for (int i = 0; i < numOfFiles; i++) {
+					System.out.println(dataIn.readUTF());
 				}
 				
-				dataOut.flush();
-				data.close();
+				dataIn.close();
+				dataOut.close();
+				dataSocket.close();
 				break;
 
-			case "RETR" :
-				if (args.length == 2) {
-					String fileName = args[1];
+			case "retr" :
+				if (arguments.length == 2) {
+					String fileName = arguments[1];
 					
-					//EST Data Communication Socket
-					data = new Socket(server, 4097);
-					InputStream dataIS  = data.getInputStream();
-					dataOut = new PrintStream(data.getOutputStream());
+					// Create data socket that is connected to server on port 2265
+					dataSocket = new Socket(server, 2265);
+					dataIn  = new DataInputStream(dataSocket.getInputStream());
+					dataOut = new DataOutputStream(dataSocket.getOutputStream());
 					
-					dataOut.println(cmd);
 					File file = new File("./client_files/" + fileName);
 					FileOutputStream fileOut = new FileOutputStream(file);
 					
 					byte[] b = new byte [1024];
 					int amount_read;
 					
-					while ((amount_read = dataIS.read(b)) != -1) {
+					while ((amount_read = dataIn.read(b)) != -1) {
 						fileOut.write(b, 0, amount_read);
 					}
 					
 					fileOut.close();
 					System.out.println("File " + fileName + " retrieved.");
 					
-					dataOut.flush();
-					data.close();
+					dataIn.close();
+					dataOut.close();
+					dataSocket.close();
 					break;
 
 				} else {
@@ -91,17 +92,16 @@ public class FTPClient {
 					break;
 				}
 
-			case "STOR" :
-				if (args.length == 2) {
+			case "stor" :
+				if (arguments.length == 2) {
 
-					String fileName = args[1];
+					String fileName = arguments[1];
 					fileName = "./client_files/" + fileName;
 					
-					//EST Data Communication Socket
-					data = new Socket(server, 4097);
-					dataOut = new PrintStream(data.getOutputStream());
-					
-					dataOut.println(cmd);
+					// Create data socket that is connected to server on port 2265
+					dataSocket = new Socket(server, 2265);
+					dataIn  = new DataInputStream(dataSocket.getInputStream());
+					dataOut = new DataOutputStream(dataSocket.getOutputStream());
 					
 					FileInputStream fis = null;
 			        boolean fileExists = true ;
@@ -124,8 +124,9 @@ public class FTPClient {
 						}
 			        }
 		            
-					dataOut.flush();
-					data.close();
+					dataIn.close();
+					dataOut.close();
+					dataSocket.close();
 					break;
 
 				} else {
@@ -133,26 +134,36 @@ public class FTPClient {
 					break;
 				}
 
-			case "QUIT" :
-				data = new Socket(server, 4097);
-				dataOut = new PrintStream(data.getOutputStream());
+			case "quit" :
+				// Create data socket that is connected to server on port 2265
+				dataSocket = new Socket(server, 2265);
+				dataIn  = new DataInputStream(dataSocket.getInputStream());
+				dataOut = new DataOutputStream(dataSocket.getOutputStream());
 				
 				System.out.println("Ending Session...");
-				dataOut.println(cmd);
 				
-				dataOut.flush();
-				data.close();
+				dataIn.close();
+				dataOut.close();
+				dataSocket.close();
+
 				input.close();
+
+				in.close();
+				out.close();
 				socket.close();
 				
 				System.out.println("Session Ended.");
-				System.exit(0);
 				break;	
+
+			default :
+				System.out.println("Invalid command.");
+				break;
 			}
 		}
+
 	}
-	
-	private static void sendFile(FileInputStream fis, OutputStream os) throws Exception {
+
+	private static void sendFile(FileInputStream fis, DataOutputStream os) throws Exception {
 		System.out.println("Sending File...");
 		byte[] buffer = new byte[1024];
 		int bytes = 0;
@@ -162,4 +173,5 @@ public class FTPClient {
 			os.write(buffer, 0, bytes);
 		}
 	}
+
 }
