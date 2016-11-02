@@ -77,16 +77,22 @@ public class Handler extends Thread {
 				System.out.println(e);
 			}
 
-			// Handle search
-			try {
-				String keyword = in.readUTF();
-				searchFile(keyword);
-			} catch (Exception e) {
-				System.out.println("Error searching files");
-				System.out.println(e);
+			String keyword = new String("");
+			while (!keyword.equals("quit")) {
+				// Handle search
+				try {
+					keyword = in.readUTF();
+					if (!keyword.equals("quit")) {
+						searchFile(keyword, out);
+					}
+				} catch (Exception e) {
+					System.out.println("Error searching files");
+					System.out.println(e);
+					System.exit(1);
+				}
 			}
 
-			System.out.println("Session Ended.");
+			// System.out.println("Session Ended.");
 			out.close();
 			in.close();
 			dataIn.close();
@@ -108,7 +114,7 @@ public class Handler extends Thread {
 		descArray = document.getElementsByTagName("description");
 	}
 
-	private void searchFile(String kw) throws Exception {
+	private static void searchFile(String kw, DataOutputStream dos) throws Exception {
 		synchronized (handlers) {
 			Enumeration e = handlers.elements ();
 			while (e.hasMoreElements()) {
@@ -126,26 +132,22 @@ public class Handler extends Thread {
 						// description contains keyword
 						// get the name of the file with that description
 						nameField = handler.nameArray.item(i).getTextContent();
-						
-						// output the speed, hostname, and filename
-						System.out.println("\nSpeed: " + handler.clientSpeed);
-						System.out.println("Hostname: " + handler.clientUsername + "/" + handler.clientHostname);
-						System.out.println("File: " + nameField);
-
 						String result = new String(handler.clientSpeed + " " + handler.clientUsername + "/" + handler.clientHostname + " " + nameField);
 						
 						try {
-							handler.out.writeUTF(result);
-						} catch (IOException ex) { 
-							handler.stop (); 
+							dos.writeUTF(result);
+						} catch (IOException ex) {
+							System.out.println(ex);
+							handler.stop ();
 						}
 					}
 				}	
 			}
 		}
+		dos.writeUTF("done");
 	}
 
-	private void printHandlers() {
+	private static void printHandlers() {
 		synchronized (handlers) {
 			Enumeration e = handlers.elements ();
 			while (e.hasMoreElements()) {

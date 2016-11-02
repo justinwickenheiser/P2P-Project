@@ -58,24 +58,33 @@ public class Host {
 		dataIn.close();
 		dataOut.close();
 		dataSocket.close();
+		
+		final int maxNumOfResults = 5;
+		String keyword = new String("");
+		String receivedMsg = new String("");
+		while (!keyword.equals("quit")) {
+			// Do a keyword search
+			System.out.println("\nKeyword Search: ");
+			keyword = input.nextLine();
+			out.writeUTF(keyword);
 
-		// Do a keyword search
-		System.out.println("\nKeyword Search: ");
-		String keyword = input.nextLine();
-		out.writeUTF(keyword);
-
-		// read responses from keyword search from central server
-		try {
-			System.out.println("\n-- Results --");
-			while (!socket.isClosed()) {
-				System.out.println(in.readUTF());
+			if (!keyword.equals("quit")) {
+				// read responses from keyword search from central server
+				try {
+					System.out.println("\n-- Results --");
+					while (!(receivedMsg = in.readUTF()).equals("done")) {
+						System.out.println(receivedMsg);
+					}
+				} catch (EOFException e) {
+					System.out.println("\n-- End of Results --");
+				}
 			}
-		} catch (EOFException e) {
-			System.out.println("\n-- End of Results --");
 		}
 
-		
-
+		// close connection socket
+		in.close();
+		out.close();
+		socket.close();
 	}
 	
 	private static void sendFile(FileInputStream fis, DataOutputStream os) throws Exception {
