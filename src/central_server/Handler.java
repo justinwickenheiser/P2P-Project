@@ -92,7 +92,14 @@ public class Handler extends Thread {
 				}
 			}
 
-			// System.out.println("Session Ended.");
+			// remove user from vector
+			handlers.remove(this);
+			// print who is left
+			System.out.println("\n---- Users ----");
+			printHandlers();
+			System.out.println("---------------");
+
+
 			out.close();
 			in.close();
 			dataIn.close();

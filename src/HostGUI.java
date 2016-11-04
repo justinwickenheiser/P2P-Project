@@ -5,30 +5,30 @@ import javax.swing.*;
 
 public class HostGUI extends Frame {
     
-    private JPanel top;
-    private JPanel center;
-    private JPanel bottom;
-    private JLabel sHostname;
-    private JLabel port;
-    private JLabel username;
-    private JLabel hostname;
-    private JLabel speed;
-    private JLabel keyword;
-    private JLabel command;
-    private JButton connect;
-    private JButton search;
-    private JButton go;
-    private JTextField sHostnameInput;
-    private JTextField portInput;
-    private JTextField usernameInput;
-    private JTextField hostnameInput;
-    private JTextField keywordInput;
-    private JTextField commandInput;
-    private JTextArea ftpCommands;
-    private JComboBox selectSpeed;
-    ActionClass actionEvent = new ActionClass();
+    public JPanel top;
+    public JPanel center;
+    public JPanel bottom;
+    public JLabel sHostname;
+    public JLabel port;
+    public JLabel username;
+    public JLabel hostname;
+    public JLabel speed;
+    public JLabel keyword;
+    public JLabel command;
+    public JButton connect;
+    public JButton search;
+    public JButton go;
+    public JTextField sHostnameInput;
+    public JTextField portInput;
+    public JTextField usernameInput;
+    public JTextField hostnameInput;
+    public JTextField keywordInput;
+    public JTextField commandInput;
+    public JTextArea ftpCommands;
+    public JComboBox selectSpeed;
+    //ActionClass actionEvent = new ActionClass();
     
-    private String[] speeds = { "Ethernet", "Wifi", "T1", "T3" };
+    public String[] speeds = { "Ethernet", "Wifi", "T1", "T3" };
     
     
 	
@@ -52,8 +52,8 @@ public class HostGUI extends Frame {
         
         //Button + Action Listener
         connect = new JButton("Connect");
-        connect.addActionListener(actionEvent);
-        connect.setActionCommand("1");
+        //connect.addActionListener(actionEvent);
+        //connect.setActionCommand("1");
         
         top.add(sHostname);
         top.add(sHostnameInput);
@@ -85,8 +85,8 @@ public class HostGUI extends Frame {
         
         //Button + Action Listener
         search = new JButton("Search");
-        search.addActionListener(actionEvent);
-        search.setActionCommand("2");
+        //search.addActionListener(actionEvent);
+        //search.setActionCommand("2");
         
         center.add(keyword);
         center.add(keywordInput);
@@ -101,8 +101,8 @@ public class HostGUI extends Frame {
         
         //Button + Action Listener
         go = new JButton("Go");
-        go.addActionListener(actionEvent);
-        go.setActionCommand("3");
+        //go.addActionListener(actionEvent);
+        //go.setActionCommand("3");
 
         ftpCommands = new JTextArea();
         ftpCommands.setPreferredSize(new Dimension(200, 150));
@@ -118,50 +118,6 @@ public class HostGUI extends Frame {
         setLocationRelativeTo(null);
         setVisible(true);
 	}
-    
-    class ActionClass implements ActionListener {
-        
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            int action = Integer.parseInt(e.getActionCommand());
-            switch (action) {
-                case 1:
-                    String server = sHostnameInput.getText();
-                    int port = Integer.parseInt(portInput.getText());
-                    String user = usernameInput.getText();
-                    String host = hostnameInput.getText();
-                    String value = selectSpeed.getSelectedItem().toString();
-                    
-                    //Call functions from Host to Connect to Server
-                    
-                    System.out.println("\nConnect Button clicked...");
-                    System.out.println("Server Hostname: " + server + "\tPort: " + port);
-                    System.out.println("User: " + user + "\tHost: " + host + "\tSpeed: " + value);
-                    break;
-                case 2:
-                    String kw = keywordInput.getText();
-                    
-                    //Run Function from Host to perfrom keyword search
-                    
-                    System.out.println("\nSearch Button clicked...");
-                    System.out.println("Keyword: " + kw);
-                    break;
-                case 3:
-                    String cmd = commandInput.getText() + "\n";
-                    String text = ftpCommands.getText();
-                    
-                    //Run FTP Client functions
-                    
-                    ftpCommands.setText(text + cmd);
-                    
-                    System.out.println("\nGo Button clicked...");
-                    System.out.println("FTP Command: " + cmd);
-                    break;
-                default:
-                    break;
-            }
-        }
-    }
 
 	public static void main(String[] args) {
         new HostGUI("NAPSTER FRIENDS");

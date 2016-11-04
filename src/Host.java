@@ -5,16 +5,42 @@ import java.lang.*;
 
 public class Host {
 
-	public static void main(String[] args) throws IOException {
-		if (args.length != 2) { // Test for correct # of args
-			throw new IllegalArgumentException("Parameter(s): <Server> <port>");
-		}
+	public HostGUI gui;
+	public FTPClient ftpClient;
+	public volatile boolean quit = false;
 
+	public String server;
+	public int serverPort;
+	public String cmd;
+	public volatile boolean receivedGroupOne = false;
+
+	public String keyword;
+	public volatile boolean receivedGroupTwo = false;
+
+
+	public Host() throws IOException {
+
+		// Create GUI and handle events
+		gui = new HostGUI("Napster and Friends");
+		gui.connect.addActionListener( new ButtonListener(this, gui, ftpClient, 1) );
+		gui.search.addActionListener( new ButtonListener(this, gui, ftpClient, 2) );
+		gui.go.addActionListener( new ButtonListener(this, gui, ftpClient, 3) );
+		
 		Scanner input = new Scanner(System.in);
 
-		String server = args[0];
-		int serverPort = new Integer(args[1]).intValue();
-
+		//server = gui.getServerHostname();
+		//serverPort = 4096; //gui.getServerPort();
+		
+		while (!receivedGroupOne) {
+			;
+		}
+			
+		/*
+		 *
+		 *	INITIAL CONNECTION
+		 *
+		 */
+				
 		// Create socket that is connected to server on specified port
 		Socket socket = new Socket(server, serverPort);
 		DataInputStream in  = new DataInputStream(socket.getInputStream());
@@ -26,11 +52,10 @@ public class Host {
 
 		System.out.println("Connecting..." + "\nServer: " + server + "\nPort: " + serverPort);
 
-
-		// Speeds: ethernet, t1, t3, modem, etc.
-		System.out.println("\nEnter the Following Command: <your_username> <your_hostname> <your_speed>");
-		String cmd = input.nextLine();
+		// write to handler the username, users hostname, and speed
 		out.writeUTF(cmd);
+
+
 
 		// Send filelist.xml file
 		String fileName = new String("fileList.xml");
@@ -58,14 +83,23 @@ public class Host {
 		dataIn.close();
 		dataOut.close();
 		dataSocket.close();
-		
-		final int maxNumOfResults = 5;
-		String keyword = new String("");
+
+
+		/*
+		 *
+		 *	KEYWORD SEARCH
+		 *
+		 */
 		String receivedMsg = new String("");
-		while (!keyword.equals("quit")) {
+		while (!quit) {
+			while (!receivedGroupTwo) {
+				;
+			}
+
+			// reset receivedMsg
+			receivedMsg = "";
+			
 			// Do a keyword search
-			System.out.println("\nKeyword Search: ");
-			keyword = input.nextLine();
 			out.writeUTF(keyword);
 
 			if (!keyword.equals("quit")) {
@@ -78,13 +112,18 @@ public class Host {
 				} catch (EOFException e) {
 					System.out.println("\n-- End of Results --");
 				}
+				receivedGroupTwo = false;
+			} else {
+				quit = true;
 			}
+		
 		}
 
 		// close connection socket
 		in.close();
 		out.close();
 		socket.close();
+		System.exit(0);
 	}
 	
 	private static void sendFile(FileInputStream fis, DataOutputStream os) throws Exception {
@@ -97,5 +136,24 @@ public class Host {
 			os.write(buffer, 0, bytes);
 		}
 	}
-	
+
+	public void setGroupOne(String serverName, int sPort, String command) {
+		server = serverName;
+		serverPort = sPort;
+		cmd = command;
+		receivedGroupOne = true;
+	}
+
+	public void setGroupTwo(String kw) {
+		keyword = kw;
+		receivedGroupTwo= true;
+	}
+
+	public static void main (String args[]) throws IOException { 
+		if (args.length != 0) {
+			throw new RuntimeException ("Syntax: java Host <Server> <port>"); 
+		}
+		Host h = new Host(); 
+	}
+
 }
