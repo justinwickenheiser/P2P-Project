@@ -5,46 +5,63 @@ import java.lang.*;
 
 public class FTPClient {
 
-	// assuming running via command line
+	String cmd;
+	String[] arguments;
+	String server;
+	int serverPort;
+
+	Socket socket;
+	DataInputStream in;
+	DataOutputStream out; 
+
+	Socket dataSocket;
+	DataInputStream dataIn;
+	DataOutputStream dataOut;
+
 	public FTPClient (String command) throws IOException {
+		this.cmd = command;
+		this.arguments = cmd.split(" ");
+
+		if (arguments.length == 2) {
+			this.server = arguments[1];
+			this.serverPort = 2264;
+		} else {
+			System.out.println("Syntax error: connect <hostname>");
+			System.exit(1);
+		}
+
+		// Create socket that is connected to server on specified port
+		this.socket = new Socket(server, serverPort);
+		this.in  = new DataInputStream(socket.getInputStream());
+		this.out = new DataOutputStream(socket.getOutputStream());
+
+	}
+	
+	public void runCommand (String command) throws IOException {
 	
 
-		String cmd = command;
-		String[] arguments = cmd.split(" ");
-		String server = "";
-		int serverPort = 0;
+		cmd = command;
+		arguments = cmd.split(" ");
 
-		Scanner input = new Scanner(System.in);
+		// Scanner input = new Scanner(System.in);
 
-		if (arguments[0].toLowerCase().equals("connect")) {
-			if (arguments.length == 2) {
-				server = arguments[1];
-				serverPort = 2264;
-			} else {
-				System.out.println("Syntax error: connect <hostname>");
-				System.exit(1);
-			}
+		// if (arguments[0].toLowerCase().equals("connect")) {
+		// 	if (arguments.length == 2) {
+		// 		server = arguments[1];
+		// 		serverPort = 2264;
+		// 	} else {
+		// 		System.out.println("Syntax error: connect <hostname>");
+		// 		System.exit(1);
+		// 	}
 
 
-		
-
-			// Create socket that is connected to server on specified port
-			Socket socket = new Socket(server, serverPort);
-			DataInputStream in  = new DataInputStream(socket.getInputStream());
-			DataOutputStream out = new DataOutputStream(socket.getOutputStream());
-
-			// predefine these variables
-			Socket dataSocket;
-			DataInputStream dataIn;
-			DataOutputStream dataOut;
-
-			System.out.println("Connecting..." + "\nServer: " + server + "\nPort: " + serverPort);
+		// 	System.out.println("Connecting..." + "\nServer: " + server + "\nPort: " + serverPort);
 			
 			// while there is still a control connection
-			while (!socket.isClosed()) {
-				System.out.print("cmd: ");
-				cmd = input.nextLine();
-				arguments = cmd.split(" ");
+			//while (!socket.isClosed()) {
+				//System.out.print("cmd: ");
+				//cmd = input.nextLine();
+				//arguments = cmd.split(" ");
 				
 				// send cmd
 				out.writeUTF(cmd);
@@ -154,7 +171,7 @@ public class FTPClient {
 					dataOut.close();
 					dataSocket.close();
 
-					input.close();
+					//input.close();
 
 					in.close();
 					out.close();
@@ -167,8 +184,8 @@ public class FTPClient {
 					System.out.println("Invalid command.");
 					break;
 				}
-			}
-		}
+			//}
+		//}
 	}
 
 	private static void sendFile(FileInputStream fis, DataOutputStream os) throws Exception {

@@ -30,7 +30,12 @@ public class ButtonListener implements ActionListener {
                 break;
             case 3:
                 try {
-                    client = new FTPClient(gui.commandInput.getText());
+                    String[] arguments = gui.commandInput.getText().split(" ");
+                    if (arguments[0].toLowerCase().equals("connect")) {
+                        client = new FTPClient(gui.commandInput.getText());
+                    } else {
+                        client.runCommand(gui.commandInput.getText());
+                    }
                 } catch (Exception ex) {
                     System.out.println("Could not instantiate FTPClient.");
                     System.out.println(ex);
