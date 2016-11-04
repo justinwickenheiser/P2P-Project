@@ -39,9 +39,6 @@ public class HostGUI extends Frame {
 		top.setBorder(BorderFactory.createTitledBorder("Connect"));
         top.setPreferredSize(new Dimension(700, 140));
         
-        //FlowLayout topPanel = new FlowLayout();
-        //top.setLayout(topPanel);
-        
         //First Row of Panel
         sHostname = new JLabel("Server Hostname:");
         sHostnameInput = new JTextField(20);
@@ -81,6 +78,7 @@ public class HostGUI extends Frame {
         keywordInput = new JTextField(20);
         keywordResults = new JTextArea();
         keywordResults.setPreferredSize(new Dimension(500, 150));
+        keywordResults.setEditable(false);
         
         //Button + Action Listener
         search = new JButton("Search");

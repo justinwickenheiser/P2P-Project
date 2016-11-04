@@ -25,6 +25,9 @@ public class ButtonListener implements ActionListener {
                 break;
             case 2:
 
+                // clear old search results
+                gui.keywordResults.setText("");
+                // get new search results
                 host.setGroupTwo(gui.keywordInput.getText());
             
                 break;
@@ -36,22 +39,20 @@ public class ButtonListener implements ActionListener {
                     } else {
                         client.runCommand(gui.commandInput.getText());
                     }
+
+                    String enteredCmd = gui.commandInput.getText() + "\n";
+                    String text = gui.ftpCommands.getText();
+
+                    // Appends new command
+                    gui.ftpCommands.setText(text + enteredCmd);
+
+                    // clear command input
+                    gui.commandInput.setText("");
+
                 } catch (Exception ex) {
                     System.out.println("Could not instantiate FTPClient.");
                     System.out.println(ex);
                 }
-                
-            /*
-                String cmd = commandInput.getText() + "\n";
-                String text = ftpCommands.getText();
-                
-                //Run FTP Client functions
-                
-                ftpCommands.setText(text + cmd);
-                
-                System.out.println("\nGo Button clicked...");
-                System.out.println("FTP Command: " + cmd);
-            */
                 break;
             default:
                 break;

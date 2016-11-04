@@ -107,6 +107,9 @@ public class Host {
 				try {
 					System.out.println("\n-- Results --");
 					while (!(receivedMsg = in.readUTF()).equals("done")) {
+                    	// Appends new command
+                    	String currentResults = gui.keywordResults.getText();
+						gui.keywordResults.setText(currentResults + receivedMsg + "\n");
 						System.out.println(receivedMsg);
 					}
 				} catch (EOFException e) {
