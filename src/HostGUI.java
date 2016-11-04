@@ -25,12 +25,10 @@ public class HostGUI extends Frame {
     public JTextField keywordInput;
     public JTextField commandInput;
     public JTextArea ftpCommands;
+    public JTextArea keywordResults;
     public JComboBox selectSpeed;
-    //ActionClass actionEvent = new ActionClass();
     
     public String[] speeds = { "Ethernet", "Wifi", "T1", "T3" };
-    
-    
 	
 	public HostGUI (String title) {
 		super (title);
@@ -52,8 +50,6 @@ public class HostGUI extends Frame {
         
         //Button + Action Listener
         connect = new JButton("Connect");
-        //connect.addActionListener(actionEvent);
-        //connect.setActionCommand("1");
         
         top.add(sHostname);
         top.add(sHostnameInput);
@@ -80,17 +76,19 @@ public class HostGUI extends Frame {
 		center = new JPanel();
 		add(center, BorderLayout.CENTER);
 		center.setBorder(BorderFactory.createTitledBorder("Search"));
+        center.setPreferredSize(new Dimension(700, 500));
         keyword = new JLabel("Keyword:");
         keywordInput = new JTextField(20);
+        keywordResults = new JTextArea();
+        keywordResults.setPreferredSize(new Dimension(500, 150));
         
         //Button + Action Listener
         search = new JButton("Search");
-        //search.addActionListener(actionEvent);
-        //search.setActionCommand("2");
         
         center.add(keyword);
         center.add(keywordInput);
         center.add(search);
+        center.add(keywordResults);
 		
         //FTP Panel - Bottom
 		bottom = new JPanel();
@@ -101,8 +99,6 @@ public class HostGUI extends Frame {
         
         //Button + Action Listener
         go = new JButton("Go");
-        //go.addActionListener(actionEvent);
-        //go.setActionCommand("3");
 
         ftpCommands = new JTextArea();
         ftpCommands.setPreferredSize(new Dimension(200, 150));
